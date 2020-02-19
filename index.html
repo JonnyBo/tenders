@@ -1,0 +1,176 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html" />
+	<meta name="author" content="JonnyBo" />
+    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" media="all" />
+	<title>Тендеры</title>
+    <style>
+    .dark {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; opacity: 0.5; z-index: 100; display: none;}
+    .popup {display: none; width: 400px; height: 250px; position: absolute;  z-index: 101; top: 50%; left: 50%; margin-left: -200px; margin-top: -120px; background: #fff; border-radius: 10px; padding: 20px;}
+    </style>
+</head>
+
+<body>
+    <div class="dark"></div>
+    <h4>Тендеры</h4>
+       <table id="tableTenders" class="table table-bordered table-hover table-condensed">
+       <thead>
+        <tr style="font-weight: bold">
+          <td style="width:10%">ID</td>
+          <td style="width:20%">Дата создания</td>
+          <td style="width:20%">Название</td>
+          <td style="width:20%">Код</td>
+          <td style="width:10%">Год</td>
+          <td style="width:20%">&nbsp;</td>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    
+   
+      <button class="btn btn-default" onclick="openForm()">Новый тендер</button>
+
+
+    <div id="newTender" class="popup">
+        <form action="" method="post">
+            <input type="hidden" name="id" value="0" />
+             <div class="form-group">
+                <input type="text" class="form-control" name="name" placeholder="Название тендера" />
+              </div>
+              <div class="form-group">
+                <input type="text" class="form-control" name="code" placeholder="Код тендера" />
+              </div>
+              <div class="form-group">
+                <input type="number" class="form-control" name="year" placeholder="Год тендера" />
+              </div>
+              <button type="button" class="btn btn-primary" onclick="addTender()">Сохранить</button>
+        </form>
+    </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+function createRow(data) {
+    var row = '';
+    if (data) {
+        row += '<tr>';
+        row += '<td>'+data.id+'</td>';
+        row += '<td>'+data.date+'</td>';
+        row += '<td>'+data.name+'</td>';
+        row += '<td>'+data.code+'</td>';
+        row += '<td>'+data.year+'</td>';
+        row += '<td><button class="btn btn-primary" onclick="editTender('+data.id+')">Редактировать</button><button class="btn btn-danger" onclick="deleteTender('+data.id+')">Удалить</button></td>';
+        row += '</tr>';
+        $('#tableTenders tbody').append(row);
+    }
+}
+function processData(data) {
+    res = JSON.parse(data);
+    console.log(res);
+    $('#tableTenders tbody').html('');
+    if (res.length > 0) {
+        $.each(res, function(i, item) {
+            createRow(item);
+        });
+    } 
+}
+function editTender(id) {
+    if (id) {
+        console.log(id);
+        $.ajax({
+    		url: 'modelTender.php?edit',
+    		type: 'post',
+            data: {'id': id},
+    		cache: false,
+    		success: function (result) {
+    		  var res = JSON.parse(result);
+              console.log(res);
+              if (res) {
+                $('#newTender').find('input[name=id]').val(res.id);
+    			$('#newTender').find('input[name=name]').val(res.name);
+                $('#newTender').find('input[name=code]').val(res.code);
+                $('#newTender').find('input[name=year]').val(res.year);
+                openForm();
+              } else {
+                alert('Не найден тендер!');
+              }
+    		},
+            fail: function (error) {
+    			alert(error);
+    		}
+    	});
+    } else {
+        alert('Не выбран элемент!');
+    }
+}
+function deleteTender(id) {
+    if (id) {
+        $.ajax({
+    		url: 'modelTender.php?del',
+    		type: 'post',
+            data: {'id': id},
+    		cache: false,
+    		success: function (result) {
+    			processData(result);
+    		},
+            fail: function (error) {
+    			alert(error);
+    		}
+    	});
+    } else {
+        alert('Не выбран элемент!');
+    }
+}
+function addTender() {
+    var name = $('#newTender').find('input[name=name]').val();
+    var code = $('#newTender').find('input[name=code]').val();
+    var year = $('#newTender').find('input[name=year]').val();
+    var id = $('#newTender').find('input[name=id]').val(); 
+    var action = 'new';
+    if (parseInt(id) > 0) {
+        action = 'update';
+    }
+    if (name && code && year) {
+        $.ajax({
+    		url: 'modelTender.php?'+action,
+    		type: 'post',
+            data: {'id': id, 'name': name, 'code': code, 'year': year},
+    		cache: false,
+    		success: function (result) {
+    			processData(result);
+                closeForm();
+    		},
+            fail: function (error) {
+    			alert(error);
+    		}
+    	});
+    } else {
+        alert('Не все поля заполнены!');
+    }
+}
+function openForm() {
+    $('.dark').show();
+    $('.popup').show(500);
+}
+function closeForm() {
+    $('#newTender').find('input').val('');
+    $('.dark').hide();
+    $('.popup').hide(500);
+}
+$(function () {
+    $.ajax({
+		url: 'modelTender.php',
+		type: 'post',
+		cache: false,
+		success: function (result) {
+			processData(result);
+		}
+	});
+    $('.dark').click(function() {
+        closeForm();
+    });
+});    
+</script>
+</body>
+</html>
