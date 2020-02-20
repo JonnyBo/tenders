@@ -58,18 +58,18 @@ $tender = new Tender($db);
 if (isset($_GET['new']) || isset($_GET['update'])) {
     if ($tender->saveTender() > 0) {
         $tenders = $tender->getAllTenders();
-        echo json_encode($tenders, true);
+        echo json_encode($tenders);
     }
 } elseif (isset($_GET['del'])) {
     $tender->deleteTender();
     $tenders = $tender->getAllTenders();
-    echo json_encode($tenders, true);
+    echo json_encode($tenders);
 } elseif (isset($_GET['edit'])) {
     $tender = $tender->getTender();
-    echo json_encode($tender, true);
+    echo json_encode($tender);
 } else {
     $tenders = $tender->getAllTenders();
-    echo json_encode($tenders, true);
+    echo json_encode($tenders);
 }
 
 ?>

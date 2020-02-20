@@ -89,7 +89,7 @@ class DB{
 		reset($this->fields);
 		foreach($this->fields as $field=>$value){
             if ($field) {
-                $f .= ($f != "" ? ", " : "") . str_replace(':', '', $field) . " = '" . $value . "'";
+                $f .= ($f != "" ? ", " : "") . str_replace(':', '', $field) . " = " . "'".$value."'";
             }
 		}
 		$sql = "UPDATE ".$table." SET ".$f." ".$where;
@@ -111,7 +111,7 @@ class DB{
         if($this->debug){
 		  $this->result = $this->link_id->query($_query) or die( $_query."<p>.print_r($this->link_id->errorInfo()).</p>" );
         } else {
-            $this->result = $this->link_id->query($_query, $this->link_id) or die( 'Ошибка в обращении к базе MySQL!' );
+            $this->result = $this->link_id->query($_query) or die( 'Ошибка в обращении к базе MySQL!' );
         }
         if($this->debug){
             list($usec, $sec) = explode(" ",microtime());
